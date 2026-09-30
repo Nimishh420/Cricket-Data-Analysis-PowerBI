@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ICC Global Cricket Analytics | Power BI Executive Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="chart.min.js"></script>
+  <script src="cricket_data.js"></script>
+</head>
+<body>
+
+  <!-- POWER BI HEADER -->
+  <header class="pbi-header">
+    <div class="pbi-brand">
+      <div class="pbi-logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-4h2v4zm0-6h-2V7h2v4zm4 6h-2v-8h2v8zm0-10h-2V7h2v2z"/>
+        </svg>
+      </div>
+      <div class="pbi-title-group">
+        <h1>
+          ICC Global Cricket Analytics
+          <span class="pbi-badge">Power BI Enterprise Edition</span>
+        </h1>
+        <p>Comprehensive Star-Schema Performance Model (T20I, ODI, Test across 2022–2026)</p>
+      </div>
+    </div>
+
+    <div class="pbi-actions">
+      <button class="btn-action" id="themeToggleBtn" title="Switch Theme">
+        <span id="themeIcon">☀️</span> Light Theme
+      </button>
+      <button class="btn-action" id="openDaxModalBtn" title="View Power BI DAX Formulas">
+        📐 DAX Formula Hub
+      </button>
+      <button class="btn-action btn-primary" id="openGuideBtn" title="View Desktop Setup Guide">
+        📖 Desktop Setup Guide
+      </button>
+    </div>
+  </header>
+
+  <!-- SLICER / FILTER STRIP -->
+  <section class="slicer-strip">
+    <div class="slicer-item">
+      <span class="slicer-label">Format:</span>
+      <div class="slicer-chips" id="formatSlicer">
+        <button class="chip-btn active" data-format="All">All Formats</button>
+        <button class="chip-btn" data-format="T20I">T20I</button>
+        <button class="chip-btn" data-format="ODI">ODI</button>
+        <button class="chip-btn" data-format="Test">Test</button>
+      </div>
+    </div>
+
+    <div class="slicer-item">
+      <span class="slicer-label">Year:</span>
+      <select class="slicer-select" id="yearSlicer">
+        <option value="All">All Years (2022-2026)</option>
+        <option value="2026">2026</option>
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+      </select>
+    </div>
+
+    <div class="slicer-item">
+      <span class="slicer-label">Tournament:</span>
+      <select class="slicer-select" id="tournamentSlicer">
+        <option value="All">All Tournaments</option>
+      </select>
+    </div>
+
+    <div class="slicer-item">
+      <span class="slicer-label">Team:</span>
+      <select class="slicer-select" id="teamSlicer">
+        <option value="All">All Teams</option>
+      </select>
+    </div>
+
+    <button class="reset-filters-btn" id="resetFiltersBtn">↺ Reset Filters</button>
+  </section>
+
+  <!-- DASHBOARD VIEWPORT -->
+  <main class="dashboard-viewport">
+
+    <!-- TAB 1: EXECUTIVE OVERVIEW -->
+    <div class="tab-page active" id="tabOverview">
+      <!-- KPI CARDS -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Total Matches</span>
+            <div class="kpi-icon">🏏</div>
+          </div>
+          <div class="kpi-value" id="kpiTotalMatches">0</div>
+          <div class="kpi-subtext">
+            <span class="trend-badge trend-up">+14.5% YoY</span> Global matches tracked
+          </div>
+        </div>
+
+        <div class="kpi-card gold">
+          <div class="kpi-top">
+            <span class="kpi-title">Total Runs Scored</span>
+            <div class="kpi-icon">⚡</div>
+          </div>
+          <div class="kpi-value" id="kpiTotalRuns">0</div>
+          <div class="kpi-subtext">
+            <span class="trend-badge trend-up">+9.2%</span> Across all innings
+          </div>
+        </div>
+
+        <div class="kpi-card green">
+          <div class="kpi-top">
+            <span class="kpi-title">Total Wickets</span>
+            <div class="kpi-icon">🎯</div>
+          </div>
+          <div class="kpi-value" id="kpiTotalWickets">0</div>
+          <div class="kpi-subtext">
+            <span class="trend-badge trend-up">15.8</span> Wickets per match avg
+          </div>
+        </div>
+
+        <div class="kpi-card orange">
+          <div class="kpi-top">
+            <span class="kpi-title">Avg 1st Innings Runs</span>
+            <div class="kpi-icon">📊</div>
+          </div>
+          <div class="kpi-value" id="kpiAvgScore">0</div>
+          <div class="kpi-subtext">
+            <span class="trend-badge trend-up">Competitive</span> Set benchmark
+          </div>
+        </div>
+
+        <div class="kpi-card purple">
+          <div class="kpi-top">
+            <span class="kpi-title">Total Boundaries</span>
+            <div class="kpi-icon">💥</div>
+          </div>
+          <div class="kpi-value" id="kpiBoundaries">0</div>
+          <div class="kpi-subtext">
+            <span id="kpiBoundarySplit">4s: 0 | 6s: 0</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Top Win% Nation</span>
+            <div class="kpi-icon">🏆</div>
+          </div>
+          <div class="kpi-value" id="kpiTopWinNation">-</div>
+          <div class="kpi-subtext">
+            <span class="trend-badge trend-up" id="kpiTopWinPct">0%</span> Highest win conversion
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW 1 -->
+      <div class="charts-grid-split">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>📈 Team Win Rate & Matches Won (%)</h3>
+            <div class="chart-tools">
+              <button class="chart-tool-btn show-dax" data-measure="Win_Percentage" title="View DAX Formula">📐</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartTeamWins"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>⚖️ Toss Decision & Match Outcome</h3>
+            <div class="chart-tools">
+              <button class="chart-tool-btn show-dax" data-measure="Toss_Win_Correlation" title="View DAX Formula">📐</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartTossImpact"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW 2 -->
+      <div class="charts-grid-2">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>📅 Cumulative Runs & Matches Trend (Timeline)</h3>
+            <div class="chart-tools">
+              <button class="chart-tool-btn show-dax" data-measure="Cumulative_Runs_YTD" title="View DAX Formula">📐</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartTimeline"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>🏟️ Tournament Volume & Scoring Index</h3>
+            <div class="chart-tools">
+              <button class="chart-tool-btn show-dax" data-measure="Avg_Runs_Per_Tournament" title="View DAX Formula">📐</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartTournaments"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: BATTING MASTERCLASS -->
+    <div class="tab-page" id="tabBatting">
+      <div class="kpi-grid">
+        <div class="kpi-card gold">
+          <div class="kpi-top">
+            <span class="kpi-title">Leading Run Scorer</span>
+            <div class="kpi-icon">👑</div>
+          </div>
+          <div class="kpi-value" id="kpiTopBatter">-</div>
+          <div class="kpi-subtext" id="kpiTopBatterRuns">0 Runs Scored</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Highest Individual Score</span>
+            <div class="kpi-icon">⭐</div>
+          </div>
+          <div class="kpi-value" id="kpiHighScore">0</div>
+          <div class="kpi-subtext" id="kpiHighScorePlayer">-</div>
+        </div>
+
+        <div class="kpi-card purple">
+          <div class="kpi-top">
+            <span class="kpi-title">Total Sixes Hit</span>
+            <div class="kpi-icon">🚀</div>
+          </div>
+          <div class="kpi-value" id="kpiTotalSixes">0</div>
+          <div class="kpi-subtext">Maximum impact boundaries</div>
+        </div>
+
+        <div class="kpi-card green">
+          <div class="kpi-top">
+            <span class="kpi-title">Total Centuries (100s)</span>
+            <div class="kpi-icon">💯</div>
+          </div>
+          <div class="kpi-value" id="kpiTotalCenturies">0</div>
+          <div class="kpi-subtext">50+ Milestone: <span id="kpiTotalFifties">0</span></div>
+        </div>
+      </div>
+
+      <div class="charts-grid-split">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>🏏 Top 10 International Run Scorers</h3>
+            <div class="chart-tools">
+              <button class="chart-tool-btn show-dax" data-measure="Total_Runs_Scored" title="View DAX Formula">📐</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartTopBatters"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>🎯 Mode of Dismissal Breakdown</h3>
+            <div class="chart-tools">
+              <button class="chart-tool-btn show-dax" data-measure="Dismissal_Type_Distribution" title="View DAX Formula">📐</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartDismissals"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom: 1.25rem;">
+        <div class="chart-header">
+          <h3>⚡ Batting Aggression: Runs Scored vs Strike Rate (Quadrant Matrix)</h3>
+          <div class="chart-tools">
+            <button class="chart-tool-btn show-dax" data-measure="Player_Strike_Rate" title="View DAX Formula">📐</button>
+          </div>
+        </div>
+        <div class="chart-body" style="height: 380px;">
+          <canvas id="chartBattingQuadrant"></canvas>
+        </div>
+      </div>
+
+      <!-- BATTING LEADERBOARD TABLE -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>📋 International Batting Leaderboard</h3>
+          <input type="text" class="table-search-input" id="searchBatterTable" placeholder="Search batter or country...">
+        </div>
+        <div class="table-container">
+          <table class="pbi-table" id="tableBatters">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Country</th>
+                <th>Role</th>
+                <th>Innings</th>
+                <th>Runs</th>
+                <th>Balls</th>
+                <th>Strike Rate</th>
+                <th>4s</th>
+                <th>6s</th>
+                <th>100s</th>
+                <th>50s</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: BOWLING DYNAMICS -->
+    <div class="tab-page" id="tabBowling">
+      <div class="kpi-grid">
+        <div class="kpi-card green">
+          <div class="kpi-top">
+            <span class="kpi-title">Leading Wicket Taker</span>
+            <div class="kpi-icon">🎳</div>
+          </div>
+          <div class="kpi-value" id="kpiTopBowler">-</div>
+          <div class="kpi-subtext" id="kpiTopBowlerWkts">0 Wickets</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Best Bowling Spell</span>
+            <div class="kpi-icon">🔥</div>
+          </div>
+          <div class="kpi-value" id="kpiBestSpell">-</div>
+          <div class="kpi-subtext" id="kpiBestSpellPlayer">-</div>
+        </div>
+
+        <div class="kpi-card orange">
+          <div class="kpi-top">
+            <span class="kpi-title">Lowest Economy Rate</span>
+            <div class="kpi-icon">🛡️</div>
+          </div>
+          <div class="kpi-value" id="kpiLowestEconomy">0.00</div>
+          <div class="kpi-subtext" id="kpiLowestEconPlayer">-</div>
+        </div>
+
+        <div class="kpi-card gold">
+          <div class="kpi-top">
+            <span class="kpi-title">Total Dot Balls Bowled</span>
+            <div class="kpi-icon">🔒</div>
+          </div>
+          <div class="kpi-value" id="kpiTotalDotBalls">0</div>
+          <div class="kpi-subtext">Pressure building deliveries</div>
+        </div>
+      </div>
+
+      <div class="charts-grid-split">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>🎯 Top 10 International Wicket Takers</h3>
+            <div class="chart-tools">
+              <button class="chart-tool-btn show-dax" data-measure="Total_Wickets_Taken" title="View DAX Formula">📐</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartTopBowlers"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>🔒 Pressure Creators: Dot Balls & Maiden Overs</h3>
+            <div class="chart-tools">
+              <button class="chart-tool-btn show-dax" data-measure="Dot_Ball_Percentage" title="View DAX Formula">📐</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartDotBalls"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom: 1.25rem;">
+        <div class="chart-header">
+          <h3>⚡ Bowling Economy vs Strike Rate Efficiency</h3>
+          <div class="chart-tools">
+            <button class="chart-tool-btn show-dax" data-measure="Bowling_Strike_Rate" title="View DAX Formula">📐</button>
+          </div>
+        </div>
+        <div class="chart-body" style="height: 360px;">
+          <canvas id="chartBowlingEfficiency"></canvas>
+        </div>
+      </div>
+
+      <!-- BOWLING LEADERBOARD TABLE -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>📋 International Bowling Leaderboard</h3>
+          <input type="text" class="table-search-input" id="searchBowlerTable" placeholder="Search bowler or country...">
+        </div>
+        <div class="table-container">
+          <table class="pbi-table" id="tableBowlers">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Country</th>
+                <th>Style</th>
+                <th>Spells</th>
+                <th>Overs</th>
+                <th>Wickets</th>
+                <th>Runs Conceded</th>
+                <th>Economy</th>
+                <th>Dot Balls</th>
+                <th>5-Wkt Hauls</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: VENUES & CONDITIONS -->
+    <div class="tab-page" id="tabVenues">
+      <div class="kpi-grid">
+        <div class="kpi-card gold">
+          <div class="kpi-top">
+            <span class="kpi-title">Highest Scoring Stadium</span>
+            <div class="kpi-icon">🏟️</div>
+          </div>
+          <div class="kpi-value" id="kpiHighestVenue">-</div>
+          <div class="kpi-subtext" id="kpiHighestVenueScore">0 Avg Runs</div>
+        </div>
+
+        <div class="kpi-card green">
+          <div class="kpi-top">
+            <span class="kpi-title">Bowler's Paradise Ground</span>
+            <div class="kpi-icon">🍃</div>
+          </div>
+          <div class="kpi-value" id="kpiLowestVenue">-</div>
+          <div class="kpi-subtext" id="kpiLowestVenueScore">Sharp turn & seam</div>
+        </div>
+
+        <div class="kpi-card purple">
+          <div class="kpi-top">
+            <span class="kpi-title">Highest Stadium Capacity</span>
+            <div class="kpi-icon">👥</div>
+          </div>
+          <div class="kpi-value" id="kpiMaxCapacity">-</div>
+          <div class="kpi-subtext">Narendra Modi Stadium (132,000)</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <span class="kpi-title">Chasing Advantage %</span>
+            <div class="kpi-icon">🏃</div>
+          </div>
+          <div class="kpi-value" id="kpiChaseAdvantage">0%</div>
+          <div class="kpi-subtext">Teams winning bat second</div>
+        </div>
+      </div>
+
+      <div class="charts-grid-2">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>🏟️ Average First Innings Score by Stadium</h3>
+            <div class="chart-tools">
+              <button class="chart-tool-btn show-dax" data-measure="Avg_First_Innings_Runs" title="View DAX Formula">📐</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartVenueScores"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>🌱 Pitch Characteristic vs Scoring Climate</h3>
+            <div class="chart-tools">
+              <button class="chart-tool-btn show-dax" data-measure="Pitch_Characteristic_Index" title="View DAX Formula">📐</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <canvas id="chartPitchTypes"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>⚖️ Stadium Toss Bias: Batting 1st vs Chasing Win Rate</h3>
+          <div class="chart-tools">
+            <button class="chart-tool-btn show-dax" data-measure="Chasing_Win_Percentage" title="View DAX Formula">📐</button>
+          </div>
+        </div>
+        <div class="chart-body" style="height: 380px;">
+          <canvas id="chartVenueTossBias"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: DAX MEASURES HUB -->
+    <div class="tab-page" id="tabDax">
+      <div class="dax-catalog-grid">
+        <div class="dax-categories-card">
+          <h4 style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem;">Measure Folders</h4>
+          <button class="dax-cat-btn active" data-cat="all">All Measures (35+)</button>
+          <button class="dax-cat-btn" data-cat="base">1. Core Fact Measures</button>
+          <button class="dax-cat-btn" data-cat="winloss">2. Win & Toss DAX</button>
+          <button class="dax-cat-btn" data-cat="batting">3. Batting Metrics</button>
+          <button class="dax-cat-btn" data-cat="bowling">4. Bowling Metrics</button>
+          <button class="dax-cat-btn" data-cat="time">5. Time Intelligence YoY</button>
+          <button class="dax-cat-btn" data-cat="formatting">6. Conditional Formatting</button>
+        </div>
+
+        <div class="dax-items-list" id="daxMeasuresContainer">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- POWER BI BOTTOM TAB BAR -->
+  <nav class="pbi-tabbar">
+    <button class="tab-btn active" data-tab="tabOverview">
+      <span>📊</span> 1. Executive Match Overview
+    </button>
+    <button class="tab-btn" data-tab="tabBatting">
+      <span>🏏</span> 2. Batting Masterclass
+    </button>
+    <button class="tab-btn" data-tab="tabBowling">
+      <span>🎳</span> 3. Bowling Dynamics
+    </button>
+    <button class="tab-btn" data-tab="tabVenues">
+      <span>🏟️</span> 4. Venues & Pitch Conditions
+    </button>
+    <button class="tab-btn" data-tab="tabDax">
+      <span>📐</span> 5. Power BI DAX Formulas Hub
+    </button>
+  </nav>
+
+  <!-- DAX MODAL DIALOG -->
+  <div class="modal-overlay" id="daxModal">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3 id="modalDaxTitle" style="color: var(--pbi-cyan); font-family: var(--font-mono);">Measure Name</h3>
+        <button class="modal-close" id="closeDaxModalBtn">&times;</button>
+      </div>
+      <p id="modalDaxDesc" style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 1rem;"></p>
+      <div class="dax-code-block">
+        <button class="copy-dax-btn" id="modalCopyBtn">Copy DAX</button>
+        <pre id="modalDaxCode"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+{
+  "name": "ICC Global Cricket Executive Theme",
+  "dataColors": [
+    "#0078D4",
+    "#F2C811",
+    "#10B981",
+    "#E01A4F",
+    "#38BDF8",
+    "#A855F7",
+    "#F0883E",
+    "#7B1113",
+    "#01411C",
+    "#0E7C3A"
+  ],
+  "background": "#0D1117",
+  "foreground": "#F0F6FC",
+  "tableAccent": "#0078D4",
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "color": { "solid": { "color": "#1C2128" } },
+            "transparency": 0
+          }
+        ],
+        "border": [
+          {
+            "color": { "solid": { "color": "#30363D" } },
+            "radius": 8,
+            "show": true
+          }
+        ],
+        "dropShadow": [
+          {
+            "show": true,
+            "color": { "solid": { "color": "#000000" } },
+            "transparency": 60,
+            "blur": 8,
+            "position": "Outer"
+          }
+        ],
+        "title": [
+          {
+            "fontColor": { "solid": { "color": "#F0F6FC" } },
+            "fontFamily": "Segoe UI",
+            "fontSize": 12,
+            "bold": true
+          }
+        ]
+      }
+    }
+  }
+}
